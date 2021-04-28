@@ -46,13 +46,15 @@ var Items = Array()
 var message = ''
 
 
-app.get('/', function(req, res){
+// app.get('/', function(req, res){
     
-    res.sendFile(__dirname + '/templates/index.html')
-})
-
-app.get('/todo', function(req, res){
-    let currentDay = date.getDay();    
+//     res.sendFile(__dirname + '/templates/index.html')
+// })
+const newList = new List({name:'Todo', items:defaultItems})
+newList.save()
+app.get('/', async function(req, res){
+    let currentDay = date.getDay();   
+    let allLists = await List.find({}, 'name'); 
     Item.find({},(err,results)=>{
         if (err) return console.error(err)
         if (results.length===0){
@@ -61,17 +63,17 @@ app.get('/todo', function(req, res){
                     return console.error(err)
                 }else{
                     console.log('smt happened', resp)
-                    res.redirect('/Item');   
+                    res.redirect('/todo');   
                 }
                 
             });
         }else{
-            res.render('list', {day: currentDay, todos:results, message:message, collectionName:'todo'});
+            res.render('list', {day: currentDay, todos:results, message:message, collectionName:'todo', allLists:allLists});
         }
     })
 })
 
-app.post('/todo', function(req, res){
+app.post('/', function(req, res){
     console.log(req.originalUrl)
     message = 'Task added successfully!'
     const newTask = new Item({
@@ -81,14 +83,14 @@ app.post('/todo', function(req, res){
         if (err) return console.error(err)
         console.log(result)
     });
-    res.redirect('/Item')
+    res.redirect('/')
 })
 
 app.post('/delete', (req, res)=>{
     const checkedItemId = req.body.itemId
     Item.findByIdAndRemove(checkedItemId, (err)=>{
         if (!err){
-            res.redirect('/Item')
+            res.redirect('/')
         }  
     })
 })
@@ -152,7 +154,7 @@ if (port==null || port==""){
 
 app.listen(port, function(){
     var today = new Date();
-    console.log("Server running on port "+PORT);
+    console.log("Server running on port "+port);
 });
 
 process.on('SIGINT', () => {
