@@ -145,7 +145,12 @@ app.post('/:listName/delete', (req, res)=>{
     })
 })
 
-app.listen(3000, function(){
+let port = process.env.PORT;
+if (port==null || port==""){
+    port=8000;
+}
+
+app.listen(port, function(){
     var today = new Date();
     console.log("Server running on port "+PORT);
 });
